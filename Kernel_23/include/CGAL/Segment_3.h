@@ -18,7 +18,6 @@
 #define CGAL_SEGMENT_3_H
 
 #include <CGAL/assertions.h>
-#include <boost/type_traits/is_same.hpp>
 #include <CGAL/Kernel/Return_base_tag.h>
 #include <CGAL/kernel_assertions.h>
 #include <CGAL/kernel_config.h>
@@ -39,7 +38,7 @@ class Segment_3 : public R_::Kernel_base::Segment_3
   typedef typename R_::Aff_transformation_3  Aff_transformation_3;
 
   typedef Segment_3                          Self;
-  CGAL_static_assertion((boost::is_same<Self, typename R_::Segment_3>::value));
+  static_assert(std::is_same<Self, typename R_::Segment_3>::value);
 
 public:
 
@@ -64,6 +63,9 @@ public:
 
   Segment_3(const Rep& s)
       : Rep(s) {}
+
+  Segment_3(Rep&& s)
+      : Rep(std::move(s)) {}
 
   Segment_3(const Point_3& sp, const Point_3& ep)
     : Rep(typename R::Construct_segment_3()(Return_base_tag(), sp, ep)) {}
@@ -133,10 +135,8 @@ public:
   }
 
   bool has_on(const Point_3 &p) const
-  { // TODO : use one predicate.
-    return R_().are_ordered_along_line_3_object()(source(),
-                                                 p,
-                                                 target());
+  {
+    return R().has_on_3_object()(*this, p);
   }
 
   Segment_3 opposite() const
@@ -146,8 +146,7 @@ public:
 
   Direction_3 direction() const
   {
-    typename R::Construct_vector_3 construct_vector;
-    return Direction_3( construct_vector( source(), target()));
+    return R().construct_direction_3_object()(*this);
   }
 
   bool is_degenerate() const
@@ -173,7 +172,7 @@ template < class R >
 std::ostream &
 operator<<(std::ostream &os, const Segment_3<R> &s)
 {
-    switch(get_mode(os)) {
+    switch(IO::get_mode(os)) {
     case IO::ASCII :
         return os << s.source() << ' ' << s.target();
     case IO::BINARY :

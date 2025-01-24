@@ -15,6 +15,7 @@
 #include <CGAL/basic.h>
 #include <CGAL/algorithm.h>
 #include <CGAL/Lazy.h>
+#include <CGAL/Lazy_exact_nt.h>
 #include <CGAL/Default.h>
 #include <CGAL/NewKernel_d/Filtered_predicate2.h>
 #include <CGAL/iterator_from_indices.h>
@@ -109,6 +110,7 @@ template<typename AT, typename ET, typename AC, typename EC, typename E2A, typen
 class Lazy_rep_XXX :
   public Lazy_rep< AT, ET, E2A >, private EC
 {
+  typedef Lazy_rep< AT, ET, E2A > Base;
   // `default_construct<T>()` is the same as `T{}`. But, this is a
   // workaround to a MSVC-2015 bug (fixed in MSVC-2017): its parser
   // seemed confused by `T{}` somewhere below.
@@ -129,9 +131,10 @@ class Lazy_rep_XXX :
   const EC& ec() const { return *this; }
   template<class...T>
   void update_exact_helper(Lazy_internal::typelist<T...>) const {
-    this->et = new ET(ec()( CGAL::exact( Lazy_internal::do_extract(T{},l) ) ... ) );
-    this->at = E2A()(*(this->et));
-    l = LL(); // There should be a nicer way to clear. Destruction for instance. With this->et as a witness of whether l has already been destructed.
+    auto* p = new typename Base::Indirect(ec()( CGAL::exact( Lazy_internal::do_extract(T{},l) ) ... ) );
+    this->set_at(p);
+    this->set_ptr(p);
+    lazy_reset_member(l);
   }
   public:
   void update_exact() const {
@@ -176,14 +179,16 @@ struct Lazy_construction2 {
   template<class...L>
   std::enable_if_t<(sizeof...(L)>0), result_type> operator()(L const&...l) const {
     CGAL_BRANCH_PROFILER(std::string(" failures/calls to   : ") + std::string(CGAL_PRETTY_FUNCTION), tmp);
-    Protect_FPU_rounding<Protection> P;
-    try {
-      return new Lazy_rep_XXX<AT, ET, AC, EC, E2A, L...>(ac, ec, l...);
-    } catch (Uncertain_conversion_exception&) {
-      CGAL_BRANCH_PROFILER_BRANCH(tmp);
-      Protect_FPU_rounding<!Protection> P2(CGAL_FE_TONEAREST);
-      return new Lazy_rep_0<AT,ET,E2A>(ec(CGAL::exact(l)...));
+    {
+      Protect_FPU_rounding<Protection> P;
+      try {
+          return new Lazy_rep_XXX<AT, ET, AC, EC, E2A, L...>(ac, ec, l...);
+      } catch (Uncertain_conversion_exception&) {}
     }
+    CGAL_BRANCH_PROFILER_BRANCH(tmp);
+    Protect_FPU_rounding<!Protection> P2(CGAL_FE_TONEAREST);
+    CGAL_expensive_assertion(FPU_get_cw() == CGAL_FE_TONEAREST);
+    return new Lazy_rep_0<AT,ET,E2A>(ec(CGAL::exact(l)...));
   }
   // FIXME: this forces us to have default constructors for all types, try to make its instantiation lazier
   // Actually, that may be the clearing in update_exact().
@@ -255,9 +260,9 @@ struct Lazy_cartesian :
     void set_dimension(int dim){ak.set_dimension(dim);ek.set_dimension(dim);}
 
     // For compilers that do not handle [[no_unique_address]]
-    typedef boost::mpl::and_<
-      internal::Do_not_store_kernel<AK_>,
-      internal::Do_not_store_kernel<EK_> > Do_not_store_kernel;
+    typedef std::bool_constant<
+      internal::Do_not_store_kernel<AK_>::value &&
+      internal::Do_not_store_kernel<EK_>::value > Do_not_store_kernel;
 
     typedef typename EK_::Dimension Dimension; // ?
     typedef Lazy_cartesian Self;

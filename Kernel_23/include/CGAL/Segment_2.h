@@ -18,11 +18,12 @@
 #define CGAL_SEGMENT_2_H
 
 #include <CGAL/assertions.h>
-#include <boost/type_traits/is_same.hpp>
 #include <CGAL/Kernel/Return_base_tag.h>
 #include <CGAL/Bbox_2.h>
 #include <CGAL/Dimension.h>
 #include <CGAL/kernel_config.h>
+
+#include <type_traits>
 
 namespace CGAL {
 
@@ -39,7 +40,7 @@ class Segment_2 : public R_::Kernel_base::Segment_2
   typedef typename R_::Kernel_base::Segment_2 RSegment_2;
 
   typedef Segment_2                           Self;
-  CGAL_static_assertion((boost::is_same<Self, typename R_::Segment_2>::value));
+  static_assert(std::is_same<Self, typename R_::Segment_2>::value);
 
 public:
 
@@ -65,6 +66,9 @@ public:
   // conversion from implementation class object to interface class object
   Segment_2(const RSegment_2& s)
     : RSegment_2(s) {}
+
+  Segment_2(RSegment_2&& s)
+    : RSegment_2(std::move(s)) {}
 
   Segment_2(const Point_2 &sp, const Point_2 &ep)
     :  RSegment_2(typename R::Construct_segment_2()(Return_base_tag(), sp,ep)) {}
@@ -242,7 +246,7 @@ template < class R >
 std::ostream &
 operator<<(std::ostream &os, const Segment_2<R> &s)
 {
-    switch(get_mode(os)) {
+    switch(IO::get_mode(os)) {
     case IO::ASCII :
         return os << s.source() << ' ' << s.target();
     case IO::BINARY :

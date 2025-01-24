@@ -10,7 +10,7 @@ namespace CGAL {
 
 \section IOstreamIntro Introduction
 
-An algorithm is the application of a serie of steps to convert some input data into output data.
+An algorithm is the application of a series of steps to convert some input data into output data.
 As such, it is necessary to have a way to input and output external data into \cgal data structures.
 This is achieved using <em>input/output (I/O) streams</em> of data, which enables reading and writing
 to and from files, the console, or other custom structures.
@@ -53,14 +53,14 @@ I/O streams. Classes external to \cgal are also supported, by means of `oformat(
 (Section \ref seciofornoncgaltypes "I/O for Non CGAL Types").
 The basic task of such an operator is to produce a
 representation of an object that can be written as a sequence of
-characters on devices as a console, a file, or a pipe. In \cgal we distinguish between a raw ascii,
+characters on devices as a console, a file, or a pipe. In \cgal we distinguish between a raw \ascii,
 a raw binary, and a pretty printing format.
 
 \code{.cpp}
 enum Mode {ASCII = 0, BINARY, PRETTY};
 \endcode
 
-In `ASCII` mode, objects are written as
+In \ascii mode, objects are written as
 a set of numbers, e.g. the coordinates of a point or
 the coefficients of a line, in a machine independent format.
 In `BINARY` mode,
@@ -69,18 +69,18 @@ as a sequence of four byte. The format depends on the machine.
 The mode `PRETTY`
 serves mainly for debugging as the type of the geometric
 object is written, as well as the data defining the object. For example
-for a point at the origin with Cartesian double coordinates, the output
+for a point at the origin with %Cartesian double coordinates, the output
 would be `PointC2(0.0, 0.0)`. At the moment \cgal does not
 provide input operations for pretty printed data. By default a stream
-is in <span class="textsc">Ascii</span> mode.
+is in \ascii mode.
 
 \cgal provides the following functions to modify the mode of an I/O stream.
 
 \code{.cpp}
 IO::Mode set_mode(std::ios& s, IO::Mode m);
-IO::Mode set_ascii_mode(std::ios& s);
-IO::Mode set_binary_mode(std::ios& s);
-IO::Mode set_pretty_mode(std::ios& s);
+IO::Mode IO::set_ascii_mode(std::ios& s);
+IO::Mode IO::set_binary_mode(std::ios& s);
+IO::Mode IO::set_pretty_mode(std::ios& s);
 \endcode
 
 The following functions enable testing whether a stream is in a certain mode:
@@ -120,11 +120,11 @@ main()
   Point p, q;
   Segment s;
 
-  CGAL::set_ascii_mode(std::cin);
+  CGAL::IO::set_ascii_mode(std::cin);
   std::cin >> p >> q;
 
   std::ifstream f("data.txt");
-  CGAL::set_binary_mode(f);
+  CGAL::IO::set_binary_mode(f);
   f >> s >> p;
 
   return 1;
@@ -161,11 +161,11 @@ int main()
   Point p(0,1), q(2,2);
   Segment s(p,q);
 
-  CGAL::set_pretty_mode(std::cout);
+  CGAL::IO::set_pretty_mode(std::cout);
   std::cout << p << std::endl << q << std::endl;
 
   std::ofstream f("data.txt");
-  CGAL::set_binary_mode(f);
+  CGAL::IO::set_binary_mode(f);
   f << s << p ;
 
   return 1;
@@ -176,17 +176,18 @@ int main()
 
 \subsubsection IOstreamUsingOutputFormatting Using Output Formatting
 
-To ensure that non-\cgal types are formatted correctly (i.e., respecting `IO::Mode`), `oformat()` can be used.
+To ensure that non-\cgal types are formatted correctly (i.e., respecting \link PkgStreamSupportEnumRef `IO::Mode` \endlink),
+`oformat()` can be used.
 For types with a `Output_rep` specialization, the respective output routine of `Output_rep`
 will be called by `oformat()`. Otherwise, the stream output operator will be called.
 
 \code{.cpp}
-std::cout << CGAL::oformat( myobject );
+std::cout << CGAL::IO::oformat( myobject );
 \endcode
 
 Optionally, you can provide a second template parameter `F` as a formatting tag:
 \code{.cpp}
-std::cout << CGAL::oformat( myobject, My_formatting_tag() );
+std::cout << CGAL::IO::oformat( myobject, My_formatting_tag() );
 \endcode
 
 For a list of formatting tags supported by the type `T`, please
@@ -197,7 +198,8 @@ refer to the documentation of the respective type.
 In some situations, you want to control the output formatting for a
 type `T`. For external types (third party libraries etc.),
 there might be problems if their stream output operator does not
-respect `IO::Mode`. The purpose of `Output_rep` is to provide a way to
+respect \link PkgStreamSupportEnumRef `IO::Mode` \endlink.
+The purpose of `Output_rep` is to provide a way to
 control output formatting that works independently of the object's
 stream output operator.
 
@@ -208,11 +210,11 @@ of `Output_rep`.
 
 If you do not specialize `Output_rep` for `T`, `T`'s
 stream output operator is called from within `Output_rep`, by
-default. If you want another behaviour for your type `T`, you
+default. If you want another behavior for your type `T`, you
 have to provide a specialization for that type. Furthermore, you can
 provide specializations with a second template parameter (a formatting
 tag). The second template parameter defaults to `Null_tag` and means
-<I>default behaviour</I>.
+<I>default behavior</I>.
 
 For example, specializing `Output_rep` for `CORE::BigRat` (without a
 formatting tag parameter) could look like this:
@@ -252,10 +254,10 @@ for drawing operations in many \cgal output streams.
 
 Each color is defined by a triple of integers `(r,g,b)` with
 0 \f$ \le \f$ r,g,b \f$ \le \f$ 255, the so-called <I>rgb-value</I> of the color.
-There are a 11 predefined `Color` constants available:
-`BLACK`, `WHITE`, `GRAY`, `RED`, `GREEN`,
-`DEEPBLUE`, `BLUE`, `PURPLE`, `VIOLET`, `ORANGE`,
-and `YELLOW`.
+There are a 11 predefined `Color` functions available:
+`black()`, `white()`, `gray()`, `red()`, `green()`,
+`deep_blue()`, `blue()`, `purple()`, `violet()`, `orange()`,
+and `yellow()`.
 
 \subsection IOstreamStream Stream Support
 
@@ -303,18 +305,18 @@ The following table shows which file formats can be read from and written for po
     <tr>
       <td>Input</td>
       <td>`read_points()`</td>
-      <td>\link PkgPointSetProcessing3IOOff `read_OFF()` \endlink</td>
-      <td>\link PkgPointSetProcessing3IOXyz `read_XYZ()` \endlink</td>
-      <td>\link PkgPointSetProcessing3IOPly `read_PLY()` \endlink</td>
-      <td>\link PkgPointSetProcessing3IOLas `read_LAS()` \endlink</td>
+      <td>\link PkgPointSetProcessing3IOOff `CGAL::IO::read_OFF()` \endlink</td>
+      <td>\link PkgPointSetProcessing3IOXyz `GAL::IO::read_XYZ()` \endlink</td>
+      <td>\link PkgPointSetProcessing3IOPly `GAL::IO::read_PLY()` \endlink</td>
+      <td>\link PkgPointSetProcessing3IOLas `GAL::IO::read_LAS()` \endlink</td>
     </tr>
     <tr>
       <td>Output</td>
       <td>`write_points()`</td>
-      <td>\link PkgPointSetProcessing3IOOff `write_OFF()` \endlink</td>
-      <td>\link PkgPointSetProcessing3IOXyz `write_XYZ()` \endlink</td>
-      <td>\link PkgPointSetProcessing3IOPly `write_PLY()` \endlink</td>
-      <td>\link PkgPointSetProcessing3IOLas `write_LAS()` \endlink</td>
+      <td>\link PkgPointSetProcessing3IOOff `GAL::IO::write_OFF()` \endlink</td>
+      <td>\link PkgPointSetProcessing3IOXyz `GAL::IO::write_XYZ()` \endlink</td>
+      <td>\link PkgPointSetProcessing3IOPly `GAL::IO::write_PLY()` \endlink</td>
+      <td>\link PkgPointSetProcessing3IOLas `GAL::IO::write_LAS()` \endlink</td>
     </tr>
 </table>
 
@@ -322,7 +324,7 @@ All of these functions (with the exception of the LAS format) can read
 and write either points alone or points with normals (depending on
 whether the `normal_map` named parameter is used by the user or not).
 
-Note that the %PLY format handles both ASCII and binary formats. In
+Note that the %PLY format handles both \ascii and binary formats. In
 addition, %PLY and %LAS are extensible formats that can embed additional
 properties. These can also be read by \cgal (see Section \ref
 Point_set_processing_3Properties_io).
@@ -343,19 +345,19 @@ The file formats supported for `CGAL::Point_set_3` are detailed in the table bel
     </tr>
     <tr>
       <td>Input</td>
-      <td>`read_point_set()`</td>
-      <td>\link PkgPointSet3IOOFF `read_OFF()` \endlink</td>
-      <td>\link PkgPointSet3IOXYZ `read_XYZ()` \endlink</td>
-      <td>\link PkgPointSet3IOPLY `read_PLY()` \endlink</td>
-      <td>\link PkgPointSet3IOLAS `read_LAS()` \endlink</td>
+      <td>`CGAL::IO::read_point_set()`</td>
+      <td>\link PkgPointSet3IOOFF `GAL::IO::read_OFF()` \endlink</td>
+      <td>\link PkgPointSet3IOXYZ `GAL::IO::read_XYZ()` \endlink</td>
+      <td>\link PkgPointSet3IOPLY `GAL::IO::read_PLY()` \endlink</td>
+      <td>\link PkgPointSet3IOLAS `GAL::IO::read_LAS()` \endlink</td>
     </tr>
     <tr>
       <td>Output</td>
-      <td>`write_point_set()`</td>
-      <td>\link PkgPointSet3IOOFF `write_OFF()` \endlink</td>
-      <td>\link PkgPointSet3IOXYZ `write_XYZ()` \endlink</td>
-      <td>\link PkgPointSet3IOPLY `write_PLY()` \endlink</td>
-      <td>\link PkgPointSet3IOLAS `write_LAS()` \endlink</td>
+      <td>`CGAL::IO::write_point_set()`</td>
+      <td>\link PkgPointSet3IOOFF `GAL::IO::write_OFF()` \endlink</td>
+      <td>\link PkgPointSet3IOXYZ `GAL::IO::write_XYZ()` \endlink</td>
+      <td>\link PkgPointSet3IOPLY `GAL::IO::write_PLY()` \endlink</td>
+      <td>\link PkgPointSet3IOLAS `GAL::IO::write_LAS()` \endlink</td>
     </tr>
 </table>
 
@@ -379,27 +381,27 @@ their indices per face (i.e a vector of 3 integers represent a triangle face).
     </tr>
     <tr>
       <td>Input</td>
-      <td>`read_polygon_soup()`</td>
-      <td>\link PkgStreamSupportIoFuncsOFF `read_OFF()` \endlink</td>
-      <td>\link PkgStreamSupportIoFuncsOBJ `read_OBJ()` \endlink</td>
-      <td>\link PkgStreamSupportIoFuncsSTL `read_STL()` \endlink</td>
-      <td>\link PkgStreamSupportIoFuncsPLY `read_PLY()` \endlink</td>
-      <td>\link PkgStreamSupportIoFuncsVTP `read_VTP()` \endlink</td>
-      <td>\link PkgStreamSupportIoFuncsGOCAD `read_GOCAD()` \endlink</td>
-      <td>\link PkgStreamSupportIoFuncsWKT `read_WKT()` \endlink</td>
-      <td>\link PkgStreamSupportIoFuncs3MF `read_3MF()` \endlink</td>
+      <td>`CGAL::IO::read_polygon_soup()`</td>
+      <td>\link PkgStreamSupportIoFuncsOFF `GAL::IO::read_OFF()` \endlink</td>
+      <td>\link PkgStreamSupportIoFuncsOBJ `GAL::IO::read_OBJ()` \endlink</td>
+      <td>\link PkgStreamSupportIoFuncsSTL `GAL::IO::read_STL()` \endlink</td>
+      <td>\link PkgStreamSupportIoFuncsPLY `GAL::IO::read_PLY()` \endlink</td>
+      <td>\link PkgStreamSupportIoFuncsVTK `GAL::IO::read_VTP()` \endlink</td>
+      <td>\link PkgStreamSupportIoFuncsGOCAD `GAL::IO::read_GOCAD()` \endlink</td>
+      <td>\link PkgStreamSupportIoFuncsWKT `GAL::IO::read_WKT()` \endlink</td>
+      <td>\link PkgStreamSupportIoFuncs3MF `GAL::IO::read_3MF()` \endlink</td>
     </tr>
     <tr>
       <td>Output</td>
-      <td>`write_polygon_soup()`</td>
-      <td>\link PkgStreamSupportIoFuncsOFF `write_OFF()` \endlink</td>
-      <td>\link PkgStreamSupportIoFuncsOBJ `write_OBJ()` \endlink</td>
-      <td>\link PkgStreamSupportIoFuncsSTL `write_STL()` \endlink</td>
-      <td>\link PkgStreamSupportIoFuncsPLY `write_PLY()` \endlink</td>
-      <td>\link PkgStreamSupportIoFuncsVTP `write_VTP()` \endlink</td>
-      <td>\link PkgStreamSupportIoFuncsGOCAD `write_GOCAD()` \endlink</td>
-      <td>\link PkgStreamSupportIoFuncsWKT `write_WKT()` \endlink</td>
-      <td>\link PkgStreamSupportIoFuncs3MF `write_3MF()` \endlink</td>
+      <td>`CGAL::IO::write_polygon_soup()`</td>
+      <td>\link PkgStreamSupportIoFuncsOFF `GAL::IO::write_OFF()` \endlink</td>
+      <td>\link PkgStreamSupportIoFuncsOBJ `GAL::IO::write_OBJ()` \endlink</td>
+      <td>\link PkgStreamSupportIoFuncsSTL `GAL::IO::write_STL()` \endlink</td>
+      <td>\link PkgStreamSupportIoFuncsPLY `GAL::IO::write_PLY()` \endlink</td>
+      <td>\link PkgStreamSupportIoFuncsVTK `GAL::IO::write_VTP()` \endlink</td>
+      <td>\link PkgStreamSupportIoFuncsGOCAD `GAL::IO::write_GOCAD()` \endlink</td>
+      <td>\link PkgStreamSupportIoFuncsWKT `GAL::IO::write_WKT()` \endlink</td>
+      <td>\link PkgStreamSupportIoFuncs3MF `GAL::IO::write_3MF()` \endlink</td>
     </tr>
 </table>
 
@@ -419,26 +421,29 @@ The table above only lists the functions that work with any polygon mesh.
       <th colspan="1">\ref IOStreamOBJ "OBJ"</th>
       <th colspan="1">\ref IOStreamGocad "GOCAD"</th>
       <th colspan="1">\ref IOStreamWRL "WRL"</th>
+      <th colspan="1">\ref IOStreamOM "OpenMesh (OM)"</th>
     </tr>
     <tr>
       <td>Input</td>
-      <td>`read_polygon_mesh()`</td>
-      <td>`read_OFF()`</td>
-      <td>`read_STL()`</td>
-      <td>`read_VTP()`</td>
-      <td>`read_OBJ()`</td>
-      <td>`read_GOCAD()`</td>
+      <td>`CGAL::IO::read_polygon_mesh()`</td>
+      <td>`CGAL::IO::read_OFF()`</td>
+      <td>`CGAL::IO::read_STL()`</td>
+      <td>`CGAL::IO::read_VTP()`</td>
+      <td>`CGAL::IO::read_OBJ()`</td>
+      <td>`CGAL::IO::read_GOCAD()`</td>
+      <td>`CGAL::IO::read_OM()`</td>
       <td><center> - </center></td>
     </tr>
     <tr>
       <td>Output</td>
-      <td>`write_polygon_mesh()`</td>
-      <td>`write_OFF()`</td>
-      <td>`write_STL()`</td>
-      <td>`write_VTP()`</td>
-      <td>`write_OBJ()`</td>
-      <td>`write_GOCAD()`</td>
-      <td>`write_WRL()`</td>
+      <td>``CGAL::IO::write_polygon_mesh()`</td>
+      <td>`CGAL::IO::write_OFF()`</td>
+      <td>`CGAL::IO::write_STL()`</td>
+      <td>`CGAL::IO::write_VTP()`</td>
+      <td>`CGAL::IO::write_OBJ()`</td>
+      <td>`CGAL::IO::write_GOCAD()`</td>
+      <td>`CGAL::IO::write_WRL()`</td>
+      <td>`CGAL::IO::write_OM()`</td>
     </tr>
 </table>
 
@@ -448,7 +453,7 @@ See the reference manual of each data structure for more information.
 
 The functions above require the input to represent a 2-manifold surface (possibly with boundaries).
 If this is not the case, the package \ref PkgPolygonMeshProcessing offers the function
-\link PMP_IO_grp `CGAL::Polygon_mesh_processing::read_polygon_mesh()` \endlink
+\link PMP_IO_grp `CGAL::Polygon_mesh_processing::IO::read_polygon_mesh()` \endlink
 which can perform some combinatorial repairing to ensure the input data is a 2-manifold.
 
 \subsection IOstream2DGeo Simple 2D Geometry IO
@@ -476,17 +481,17 @@ from the standard \cgal I/O functions.
 </tr>
 <tr>
 <td>Input</td>
-<td>read_WKT()</td>
-<td>read_multi_point_WKT()</td>
-<td>read_multi_linestring_WKT()</td>
-<td>read_multi_polygon_WKT()</td>
+<td>`CGAL::IO::read_WKT()`</td>
+<td>`CGAL::IO::read_multi_point_WKT()`</td>
+<td>`CGAL::IO::read_multi_linestring_WKT()`</td>
+<td>`CGAL::IO::read_multi_polygon_WKT()`</td>
 </tr>
 <tr>
 <td>Output</td>
 <td><center> - </center></td>
-<td>write_multi_point_WKT()</td>
-<td>write_multi_linestring_WKT()</td>
-<td>write_multi_polygon_WKT()</td>
+<td>`CGAL::IO::write_multi_point_WKT()`</td>
+<td>`CGAL::IO::write_multi_linestring_WKT()`</td>
+<td>`CGAL::IO::write_multi_polygon_WKT()`</td>
 </tr>
 </table>
 
@@ -517,4 +522,3 @@ which might look as follows:
 
 */
 } /* namespace CGAL */
-

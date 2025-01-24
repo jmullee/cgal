@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 {
   Triangle_mesh tmesh;
 
-  std::ifstream input((argc>1)?argv[1]:"data/elephant.off");
+  std::ifstream input((argc>1)?argv[1]:CGAL::data_file_path("meshes/elephant.off"));
   input >> tmesh;
 
   // pick up a random face
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
 
   // For all vertices in the tmesh, compute the points of
   // the shortest path to the source point and write them
-  // into a file readable using the CGAL Polyhedron demo
+  // into a file readable using CGAL Lab
   std::ofstream output("shortest_paths_no_id.polylines.txt");
   vertex_iterator vit, vit_end;
   for ( boost::tie(vit, vit_end) = vertices(tmesh);

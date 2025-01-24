@@ -3,6 +3,7 @@ Algebraic_foundations
 Arithmetic_kernel
 BGL
 Box_intersection_d
+CGAL_Core
 Cartesian_kernel
 Circulator
 Distance_2
@@ -35,3 +36,4 @@ TDS_3
 Triangulation_2
 Triangulation_3
 Union_find
+Weights

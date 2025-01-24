@@ -18,12 +18,13 @@
 #define CGAL_RAY_2_H
 
 #include <CGAL/assertions.h>
-#include <boost/type_traits/is_same.hpp>
 #include <CGAL/Kernel/Return_base_tag.h>
 #include <CGAL/kernel_assertions.h>
 #include <CGAL/representation_tags.h>
 #include <CGAL/Dimension.h>
 #include <CGAL/IO/io.h>
+
+#include <type_traits>
 
 namespace CGAL {
 
@@ -41,7 +42,7 @@ class Ray_2 : public R_::Kernel_base::Ray_2
   typedef typename R_::Kernel_base::Ray_2    RRay_2;
 
   typedef Ray_2                              Self;
-  CGAL_static_assertion((boost::is_same<Self, typename R_::Ray_2>::value));
+  static_assert(std::is_same<Self, typename R_::Ray_2>::value);
 
 public:
 
@@ -66,6 +67,9 @@ public:
 
   Ray_2(const RRay_2& r)
     : RRay_2(r) {}
+
+  Ray_2(RRay_2&& r)
+    : RRay_2(std::move(r)) {}
 
   Ray_2(const Point_2 &sp, const Point_2 &secondp)
     : RRay_2(typename R::Construct_ray_2()(Return_base_tag(), sp, secondp)) {}
@@ -198,7 +202,7 @@ template <class R >
 std::ostream&
 insert(std::ostream& os, const Ray_2<R>& r, const Cartesian_tag&)
 {
-    switch(get_mode(os)) {
+    switch(IO::get_mode(os)) {
     case IO::ASCII :
         return os << r.source() << ' ' << r.second_point();
     case IO::BINARY :
@@ -212,7 +216,7 @@ template <class R >
 std::ostream&
 insert(std::ostream& os, const Ray_2<R>& r, const Homogeneous_tag&)
 {
-  switch(get_mode(os))
+  switch(IO::get_mode(os))
   {
     case IO::ASCII :
         return os << r.source() << ' ' << r.second_point();

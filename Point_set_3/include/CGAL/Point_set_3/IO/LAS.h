@@ -32,6 +32,8 @@ class Point_set_3;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Read
 
+namespace IO {
+
 namespace internal {
 
 template <typename PointSet, typename PropertyMap>
@@ -50,9 +52,9 @@ void check_if_property_is_used(PointSet& point_set,
 /*!
   \ingroup PkgPointSet3IOLAS
 
-  \brief reads the content of an intput stream in the \ref IOStreamLAS into a point set.
+  \brief reads the content of an input stream in the \ref IOStreamLAS into a point set.
 
-  \attention When reading a binary file, the flag `std::ios::binary` flag must be set during the creation of the `ifstream`.
+  \attention To read a binary file, the flag `std::ios::binary` must be set during the creation of the `ifstream`.
 
   \param is the input stream
   \param point_set the point set
@@ -145,7 +147,7 @@ bool read_LAS(std::istream& is,
 /*!
   \ingroup PkgPointSet3IOLAS
 
-  \brief reads the content of an intput file in the \ref IOStreamLAS into a point set.
+  \brief reads the content of an input file in the \ref IOStreamLAS into a point set.
 
   \param fname the path to the input file
   \param point_set the point set
@@ -158,23 +160,19 @@ template <typename Point, typename Vector>
 bool read_LAS(const std::string& fname, CGAL::Point_set_3<Point, Vector>& point_set)
 {
   std::ifstream is(fname, std::ios::binary);
-  CGAL::set_mode(is, CGAL::IO::BINARY);
+  CGAL::IO::set_mode(is, CGAL::IO::BINARY);
   return read_LAS(is, point_set);
 }
 
+} // namespace IO
+
 #ifndef CGAL_NO_DEPRECATED_CODE
 
-/*!
-  \ingroup PkgPointSet3IODeprecated
-
-  \deprecated This function is deprecated since \cgal 5.2,
-              \link PkgPointSet3IO `CGAL::read_LAS()` \endlink should be used instead.
- */
 template <typename Point, typename Vector>
 CGAL_DEPRECATED bool read_las_point_set(std::istream& is, ///< input stream.
                                         CGAL::Point_set_3<Point, Vector>& point_set) ///< point set
 {
-  return read_LAS(is, point_set);
+  return IO::read_LAS(is, point_set);
 }
 
 #endif // CGAL_NO_DEPRECATED_CODE
@@ -183,12 +181,14 @@ CGAL_DEPRECATED bool read_las_point_set(std::istream& is, ///< input stream.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Write
 
+namespace IO {
+
 /*!
   \ingroup PkgPointSet3IOLAS
 
   \brief writes the content of a point set into an output stream in the \ref IOStreamLAS.
 
-  \attention When writing a binary file, the flag `std::ios::binary` flag must be set during the creation of the `ofstream`.
+  \attention To write to a binary file, the flag `std::ios::binary` must be set during the creation of the `ofstream`.
 
   \tparam Point the point type of the `Point_set_3`
   \tparam Vector the vector type of the `Point_set_3`
@@ -302,25 +302,25 @@ bool write_LAS(std::ostream& os,
 
   if(remove_R)
   {
-    Uchar_map charR, charG, charB;
-    bool foundR, foundG, foundB;
-    boost::tie(charR, foundR) = point_set.template property_map<unsigned char>("r");
-    if(!foundR)
-      boost::tie(charR, foundR) = point_set.template property_map<unsigned char>("red");
-    boost::tie(charG, foundG) = point_set.template property_map<unsigned char>("g");
-    if(!foundG)
-      boost::tie(charG, foundG) = point_set.template property_map<unsigned char>("green");
-    boost::tie(charB, foundB) = point_set.template property_map<unsigned char>("b");
-    if(!foundB)
-      boost::tie(charB, foundB) = point_set.template property_map<unsigned char>("blue");
+    std::optional<Uchar_map> charR, charG, charB;
 
-    if(foundR && foundG && foundB)
+    charR = point_set.template property_map<unsigned char>("r");
+    if(!charR.has_value())
+      charR = point_set.template property_map<unsigned char>("red");
+    charG = point_set.template property_map<unsigned char>("g");
+    if(!charG.has_value())
+      charG = point_set.template property_map<unsigned char>("green");
+    charB = point_set.template property_map<unsigned char>("b");
+    if(!charB.has_value())
+      charB = point_set.template property_map<unsigned char>("blue");
+
+    if(charR.has_value() && charG.has_value() && charB.has_value())
     {
       for(typename Point_set::iterator it = point_set.begin(); it != point_set.end(); ++it)
       {
-        put(R, *it, (unsigned short)(get(charR, *it)));
-        put(G, *it, (unsigned short)(get(charG, *it)));
-        put(B, *it, (unsigned short)(get(charB, *it)));
+        put(R, *it, (unsigned short)(get(charR.value(), *it)));
+        put(G, *it, (unsigned short)(get(charG.value(), *it)));
+        put(B, *it, (unsigned short)(get(charB.value(), *it)));
       }
     }
   }
@@ -390,23 +390,19 @@ bool write_LAS(const std::string& fname,
                CGAL::Point_set_3<Point, Vector>& point_set)
 {
   std::ofstream os(fname, std::ios::binary);
-  CGAL::set_mode(os, CGAL::IO::BINARY);
+  CGAL::IO::set_mode(os, CGAL::IO::BINARY);
   return write_LAS(os, point_set);
 }
 
+} // namespace IO
+
 #ifndef CGAL_NO_DEPRECATED_CODE
 
-/*!
-  \ingroup PkgPointSet3IODeprecated
-
-  \deprecated This function is deprecated since \cgal 5.2,
-              \link PkgPointSet3IO `CGAL::write_LAS()` \endlink should be used instead.
- */
 template <typename Point, typename Vector>
 CGAL_DEPRECATED bool write_las_point_set(std::ostream& os, ///< output stream.
                                          CGAL::Point_set_3<Point, Vector>& point_set)  ///< point set
 {
-  return write_LAS(os, point_set);
+  return IO::write_LAS(os, point_set);
 }
 
 #endif // CGAL_NO_DEPRECATED_CODE
